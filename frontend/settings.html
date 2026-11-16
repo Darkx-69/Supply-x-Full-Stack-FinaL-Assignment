@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">System Settings & Configurations</h1>
+                        <p class="page-subheading">Enterprise operating parameters, warehouse definitions, and technical environment specifications</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- General Settings -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Warehouse & Operational Parameters</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Primary Distribution Facility</label>
+                            <input type="text" class="form-control" value="SupplySync Central Distribution Center" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Default Receiving Dock</label>
+                            <input type="text" class="form-control" value="Receiving Bay 4B, Warehouse Unit 12" readonly>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Default Purchase Order Tax Rate</label>
+                                <input type="text" class="form-control" value="5.00 %" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Currency Standard</label>
+                                <input type="text" class="form-control" value="USD ($)" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Specifications -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Technology Stack Diagnostics</h3>
+                        </div>
+                        <div style="font-size: var(--font-size-sm); color: var(--slate-700); display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                                <span>Backend Runtime:</span>
+                                <strong>Java 21 LTS</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                                <span>Framework:</span>
+                                <strong>Spring Boot 3.3.4 (Spring Data JPA, Spring Security)</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                                <span>Relational Database:</span>
+                                <strong>MySQL 8.x (InnoDB, UTF-8 MB4)</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                                <span>Authentication Architecture:</span>
+                                <strong>Stateless JWT (HMAC-SHA256) & BCrypt</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--slate-100); padding-bottom: 0.5rem;">
+                                <span>Frontend Architecture:</span>
+                                <strong>HTML5, CSS3, Vanilla JavaScript, Chart.js</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding-top: 0.25rem;">
+                                <span>API Protocol:</span>
+                                <strong>RESTful JSON over Fetch API</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('settings', 'System Settings', 'Account');
+            }
+        });
+    </script>
+</body>
+</html>

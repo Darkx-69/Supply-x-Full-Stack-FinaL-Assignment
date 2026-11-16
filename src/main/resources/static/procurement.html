@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procurement Requisitions – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">Procurement Requisitions</h1>
+                        <p class="page-subheading">Manage material requisition requests, multi-vendor estimates, and PO conversion approval workflows</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openCreatePrModal()">
+                            <i class="fa-solid fa-plus"></i> New Requisition
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search by PR number or vendor..." oninput="loadProcurementRequests()">
+                    </div>
+                    <div class="filter-actions">
+                        <select id="status-filter" class="filter-select" onchange="loadProcurementRequests()">
+                            <option value="">All Statuses</option>
+                            <option value="PENDING">Pending Approval</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="CONVERTED_TO_ORDER">Converted to PO</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-input').value=''; document.getElementById('status-filter').value=''; loadProcurementRequests();">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Procurement Requests Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>PR Number</th>
+                                <th>Assigned Vendor</th>
+                                <th>Requested By</th>
+                                <th>Request Date</th>
+                                <th>Estimated Total</th>
+                                <th>Approval Status</th>
+                                <th style="width: 220px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="procurement-tbody">
+                            <tr><td colspan="7" style="text-align: center; padding: 3rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading requisitions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Create Procurement Request Modal -->
+    <div class="modal-overlay" id="create-pr-modal">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Create Procurement Requisition</h3>
+                    <p class="card-subtitle">Draft a requisition and specify required quantities for quotation</p>
+                </div>
+                <button class="modal-close" onclick="Common.closeModal('create-pr-modal')">&times;</button>
+            </div>
+            <form id="pr-form" onsubmit="handlePrFormSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-row" style="margin-bottom: 1.25rem;">
+                        <div class="form-group" style="flex: 2;">
+                            <label class="form-label required" for="pr-vendor">Target Vendor</label>
+                            <select id="pr-vendor" class="form-control" required>
+                                <option value="">Select Vendor...</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 3;">
+                            <label class="form-label" for="pr-notes">Requisition Notes & Justification</label>
+                            <input type="text" id="pr-notes" class="form-control" placeholder="e.g. Urgent Q4 production replenishment...">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--navy-900);">Requisition Line Items</h4>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="addPrItemRow()">
+                            <i class="fa-solid fa-plus"></i> Add Another Item
+                        </button>
+                    </div>
+
+                    <div class="table-container" style="box-shadow: none; border: 1px solid var(--slate-200); margin-bottom: 1.25rem;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%;">Product</th>
+                                    <th style="width: 15%;">Quantity</th>
+                                    <th style="width: 20%;">Est. Unit Price ($)</th>
+                                    <th style="width: 15%;">Subtotal</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="pr-items-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="text-align: right; padding: 0.75rem 1rem; background: var(--slate-50); border-radius: var(--radius-sm); border: 1px solid var(--slate-200);">
+                        <span style="font-size: var(--font-size-sm); color: var(--slate-500); font-weight: 600;">Total Estimated Expenditure: </span>
+                        <span style="font-size: 1.35rem; font-weight: 800; color: var(--navy-900);" id="pr-grand-total">$0.00</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Common.closeModal('create-pr-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit Requisition</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View PR Details Modal -->
+    <div class="modal-overlay" id="view-pr-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Requisition <span id="view-pr-number">-</span></h3>
+                    <p class="card-subtitle">Detailed item specification and status</p>
+                </div>
+                <button class="modal-close" onclick="Common.closeModal('view-pr-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="po-address-grid" style="margin-bottom: 1.25rem;">
+                    <div class="po-address-box">
+                        <div class="po-address-heading">Requisition Summary</div>
+                        <p><strong>Vendor:</strong> <span id="view-pr-vendor">-</span></p>
+                        <p><strong>Requester:</strong> <span id="view-pr-requester">-</span></p>
+                        <p><strong>Submitted:</strong> <span id="view-pr-date">-</span></p>
+                    </div>
+                    <div class="po-address-box">
+                        <div class="po-address-heading">Status & Notes</div>
+                        <p><strong>Status:</strong> <span id="view-pr-status">-</span></p>
+                        <p><strong>Notes:</strong> <span id="view-pr-notes">-</span></p>
+                    </div>
+                </div>
+
+                <div class="table-container" style="box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product Item</th>
+                                <th>Quantity</th>
+                                <th>Est. Unit Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="view-pr-items-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div style="text-align: right; margin-top: 1rem; font-size: 1.15rem; font-weight: 700;">
+                    Total: <span id="view-pr-total" style="color: var(--primary);">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="Common.closeModal('view-pr-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/procurement.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('procurement', 'Procurement Management', 'Operations');
+                initProcurementPage();
+            }
+        });
+    </script>
+</body>
+</html>

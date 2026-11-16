@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Movements & Audit Logs – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">Stock Transaction History</h1>
+                        <p class="page-subheading">Immutable audit log of all inventory movements, receipts, issues, and manual balance overrides</p>
+                    </div>
+                    <div class="page-actions">
+                        <a href="inventory.html" class="btn btn-primary">
+                            <i class="fa-solid fa-warehouse"></i> Warehouse Inventory
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search by product name, SKU, or order reference..." oninput="loadTransactions()">
+                    </div>
+                    <div class="filter-actions">
+                        <select id="type-filter" class="filter-select" onchange="loadTransactions()">
+                            <option value="">All Movement Types</option>
+                            <option value="PURCHASE_RECEIVED">Purchase Received (PO Inward)</option>
+                            <option value="STOCK_ADDED">Stock Added</option>
+                            <option value="STOCK_REMOVED">Stock Removed</option>
+                            <option value="MANUAL_ADJUSTMENT">Manual Adjustment</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-input').value=''; document.getElementById('type-filter').value=''; loadTransactions();">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tx ID</th>
+                                <th>Product Item</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Previous &rarr; New</th>
+                                <th>Reference</th>
+                                <th>Timestamp</th>
+                                <th>Reason / Operator</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-tbody">
+                            <tr><td colspan="8" style="text-align: center; padding: 3rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading transaction history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/transactions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('transactions', 'Stock Movements', 'Operations');
+                loadTransactions();
+            }
+        });
+    </script>
+</body>
+</html>

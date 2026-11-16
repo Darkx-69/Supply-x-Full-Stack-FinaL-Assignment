@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Management – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">Vendor Management</h1>
+                        <p class="page-subheading">Manage suppliers, business relationships, contact info, and performance history</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openAddVendorModal()">
+                            <i class="fa-solid fa-plus"></i> Add New Vendor
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search by company, contact person, city, or email..." oninput="loadVendors()">
+                    </div>
+                    <div class="filter-actions">
+                        <select id="status-filter" class="filter-select" onchange="loadVendors()">
+                            <option value="">All Statuses</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                        <input type="text" id="category-filter" class="form-control" style="width: 180px;" placeholder="Filter by category..." oninput="loadVendors()">
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-input').value=''; document.getElementById('status-filter').value=''; document.getElementById('category-filter').value=''; loadVendors();">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vendor Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Contact Person</th>
+                                <th>Contact Details</th>
+                                <th>City</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendors-tbody">
+                            <tr><td colspan="7" style="text-align: center; padding: 3rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading suppliers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add / Edit Vendor Modal -->
+    <div class="modal-overlay" id="vendor-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title" id="vendor-modal-title">Add New Vendor</h3>
+                <button class="modal-close" onclick="Common.closeModal('vendor-modal')">&times;</button>
+            </div>
+            <form id="vendor-form" onsubmit="handleVendorFormSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="vendor-id">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="company-name">Company Name</label>
+                            <input type="text" id="company-name" class="form-control" placeholder="e.g. Acme Industrial Corp" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required" for="contact-person">Primary Contact Person</label>
+                            <input type="text" id="contact-person" class="form-control" placeholder="e.g. Jane Smith" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="email">Business Email</label>
+                            <input type="email" id="email" class="form-control" placeholder="contact@acme.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required" for="phone">Phone Number</label>
+                            <input type="text" id="phone" class="form-control" placeholder="+1 555-0100" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="city">City / Region</label>
+                            <input type="text" id="city" class="form-control" placeholder="Chicago">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="business-category">Business Category</label>
+                            <input type="text" id="business-category" class="form-control" placeholder="e.g. Raw Materials, Electronics">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="vendor-status">Vendor Status</label>
+                            <select id="vendor-status" class="form-control">
+                                <option value="ACTIVE">Active</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="address">Full Physical Address</label>
+                        <textarea id="address" class="form-control" rows="2" placeholder="Street address, building, suite..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Common.closeModal('vendor-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Vendor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Vendor Details & Orders Modal -->
+    <div class="modal-overlay" id="vendor-details-modal">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="view-company">-</h3>
+                    <p class="card-subtitle">Supplier Profile & Historical Orders</p>
+                </div>
+                <button class="modal-close" onclick="Common.closeModal('vendor-details-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="po-address-grid" style="margin-bottom: 1.5rem;">
+                    <div class="po-address-box">
+                        <div class="po-address-heading">Contact Details</div>
+                        <p><strong>Contact:</strong> <span id="view-contact">-</span></p>
+                        <p><strong>Email:</strong> <span id="view-email">-</span></p>
+                        <p><strong>Phone:</strong> <span id="view-phone">-</span></p>
+                        <p><strong>Status:</strong> <span id="view-status">-</span></p>
+                    </div>
+                    <div class="po-address-box">
+                        <div class="po-address-heading">Business Information</div>
+                        <p><strong>Category:</strong> <span id="view-category">-</span></p>
+                        <p><strong>Facility Address:</strong> <span id="view-address">-</span></p>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--navy-900);">Order History</h4>
+                <div class="table-container" style="box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order Number</th>
+                                <th>Date</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendor-orders-tbody">
+                            <tr><td colspan="4" class="table-empty">Loading orders...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="Common.closeModal('vendor-details-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/vendors.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('vendors', 'Vendor Management', 'Supply Chain');
+                loadVendors();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">Inventory Management</h1>
+                        <p class="page-subheading">Live stock levels, safety thresholds, inventory valuation, and restock alerts</p>
+                    </div>
+                    <div class="page-actions">
+                        <a href="transactions.html" class="btn btn-secondary">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Stock Movement Logs
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Ribbon -->
+                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.25rem;">
+                    <div class="stat-card">
+                        <div class="stat-details">
+                            <span class="stat-label">Total Units In Stock</span>
+                            <span class="stat-value" id="summary-total-units">0</span>
+                            <span class="stat-subtext">Across all warehouse bins</span>
+                        </div>
+                        <div class="stat-icon primary"><i class="fa-solid fa-boxes-stacked"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-details">
+                            <span class="stat-label">Low Stock Alerts</span>
+                            <span class="stat-value" id="summary-low-stock" style="color: var(--danger);">0</span>
+                            <span class="stat-subtext">Requires procurement order</span>
+                        </div>
+                        <div class="stat-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-details">
+                            <span class="stat-label">Total Stock Valuation</span>
+                            <span class="stat-value" id="summary-total-val" style="color: var(--success);">$0.00</span>
+                            <span class="stat-subtext">Current asset value</span>
+                        </div>
+                        <div class="stat-icon success"><i class="fa-solid fa-coins"></i></div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search inventory by product name or SKU..." oninput="loadInventory()">
+                    </div>
+                    <div class="filter-actions">
+                        <select id="category-filter" class="filter-select" onchange="loadInventory()">
+                            <option value="">All Categories</option>
+                        </select>
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); cursor: pointer; color: var(--slate-700); font-weight: 500;">
+                            <input type="checkbox" id="low-stock-filter" onchange="loadInventory()">
+                            <span>Show Low Stock Only</span>
+                        </label>
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-input').value=''; document.getElementById('category-filter').value=''; document.getElementById('low-stock-filter').checked=false; loadInventory();">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Inventory Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name & SKU</th>
+                                <th>Category</th>
+                                <th>Available Stock</th>
+                                <th>Safety Limits (Min/Max)</th>
+                                <th>Unit Price</th>
+                                <th>Total Valuation</th>
+                                <th>Stock Health</th>
+                                <th style="width: 170px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-tbody">
+                            <tr><td colspan="8" style="text-align: center; padding: 3rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading warehouse inventory...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Adjust Stock Modal -->
+    <div class="modal-overlay" id="adjust-stock-modal">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Adjust Stock Level</h3>
+                    <p class="card-subtitle" id="adjust-product-name">-</p>
+                </div>
+                <button class="modal-close" onclick="Common.closeModal('adjust-stock-modal')">&times;</button>
+            </div>
+            <form id="adjust-form" onsubmit="handleAdjustSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="adjust-product-id">
+
+                    <div style="background: var(--slate-50); border: 1px solid var(--slate-200); padding: 0.85rem; border-radius: var(--radius-sm); margin-bottom: 1.25rem;">
+                        <span style="font-size: var(--font-size-xs); color: var(--slate-500); text-transform: uppercase; font-weight: 700;">Current Available Quantity:</span>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--navy-900);" id="adjust-current-stock">0</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="adjust-type">Adjustment Type</label>
+                        <select id="adjust-type" class="form-control" required>
+                            <option value="STOCK_ADDED">Add Stock (+ Units)</option>
+                            <option value="STOCK_REMOVED">Remove Stock (- Units)</option>
+                            <option value="MANUAL_ADJUSTMENT">Manual Override (Set Absolute Count)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="adjust-quantity">Quantity Units</label>
+                        <input type="number" id="adjust-quantity" class="form-control" min="1" placeholder="Enter units..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="adjust-reason">Audit Reason / Order Reference</label>
+                        <input type="text" id="adjust-reason" class="form-control" placeholder="e.g. Cycle count adjustment, damaged goods write-off...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Common.closeModal('adjust-stock-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Apply Adjustment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Threshold Modal -->
+    <div class="modal-overlay" id="threshold-modal">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title">Configure Safety Thresholds</h3>
+                    <p class="card-subtitle" id="threshold-product-name">-</p>
+                </div>
+                <button class="modal-close" onclick="Common.closeModal('threshold-modal')">&times;</button>
+            </div>
+            <form id="threshold-form" onsubmit="handleThresholdSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="threshold-inv-id">
+
+                    <div class="form-group">
+                        <label class="form-label required" for="threshold-min">Minimum Stock Level (Trigger Low-Stock Alert)</label>
+                        <input type="number" id="threshold-min" class="form-control" min="0" required>
+                        <span class="form-hint">Whenever available quantity drops to or below this level, an alert is raised.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="threshold-max">Maximum Stock Level (Capacity Cap)</label>
+                        <input type="number" id="threshold-max" class="form-control" min="1" required>
+                        <span class="form-hint">Maximum recommended storage units to prevent warehouse overfilling.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Common.closeModal('threshold-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Limits</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/inventory.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('inventory', 'Inventory Management', 'Supply Chain');
+                initInventoryPage();
+            }
+        });
+    </script>
+</body>
+</html>

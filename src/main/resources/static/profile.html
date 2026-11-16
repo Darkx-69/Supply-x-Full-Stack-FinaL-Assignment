@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">User Profile & Credentials</h1>
+                        <p class="page-subheading">Manage your account information, contact credentials, and security password</p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: flex-start;">
+                    <!-- User Card -->
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; margin: 0 auto 1rem;" id="profile-avatar">
+                            U
+                        </div>
+                        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--navy-900);" id="profile-display-name">User Account</h2>
+                        <div style="margin-top: 0.35rem;">
+                            <span class="badge badge-primary" id="profile-role">ROLE</span>
+                        </div>
+
+                        <div id="profile-vendor-info" style="display: none; margin-top: 1rem; padding: 0.75rem; background: var(--slate-50); border-radius: var(--radius-sm); border: 1px solid var(--slate-200);">
+                            <span style="font-size: 0.72rem; color: var(--slate-400); font-weight: 700; text-transform: uppercase;">Linked Vendor Partner:</span>
+                            <div style="font-weight: 600; color: var(--navy-900);" id="profile-vendor-name">-</div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; border-top: 1px solid var(--slate-100); padding-top: 1rem; font-size: 0.8rem; color: var(--slate-500); text-align: left;">
+                            <div><i class="fa-solid fa-calendar-check" style="margin-right: 0.4rem;"></i> Joined: <strong id="profile-joined">-</strong></div>
+                            <div style="margin-top: 0.35rem;"><i class="fa-solid fa-shield-halved" style="margin-right: 0.4rem;"></i> Auth: <strong>BCrypt & Stateless JWT</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Forms Column -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <!-- Profile Information Form -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Personal Information</h3>
+                            </div>
+                            <form onsubmit="handleProfileUpdate(event)">
+                                <div class="form-group">
+                                    <label class="form-label" for="profile-email">Work Email (Read Only)</label>
+                                    <input type="email" id="profile-email" class="form-control" readonly>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required" for="profile-fullname">Full Name</label>
+                                        <input type="text" id="profile-fullname" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="profile-phone">Contact Phone</label>
+                                        <input type="text" id="profile-phone" class="form-control">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk"></i> Update Profile
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Change Password Form -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Change Password</h3>
+                            </div>
+                            <form id="password-form" onsubmit="handlePasswordChange(event)">
+                                <div class="form-group">
+                                    <label class="form-label required" for="pwd-current">Current Password</label>
+                                    <input type="password" id="pwd-current" class="form-control" placeholder="••••••••" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required" for="pwd-new">New Password (Min 6 Characters)</label>
+                                        <input type="password" id="pwd-new" class="form-control" placeholder="••••••••" minlength="6" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required" for="pwd-confirm">Confirm New Password</label>
+                                        <input type="password" id="pwd-confirm" class="form-control" placeholder="••••••••" minlength="6" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="fa-solid fa-key"></i> Update Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/profile.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('profile', 'User Profile', 'Account');
+                loadUserProfile();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebar-container"></div>
+
+        <div class="main-wrapper">
+            <div id="topbar-container"></div>
+
+            <main class="content-container">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-heading">Category Management</h1>
+                        <p class="page-subheading">Classify materials, components, and finished goods for streamlined inventory and reporting</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="openAddCategoryModal()">
+                            <i class="fa-solid fa-plus"></i> Add New Category
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th>Description</th>
+                                <th>Product Count</th>
+                                <th>Created Date</th>
+                                <th style="width: 200px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-tbody">
+                            <tr><td colspan="5" style="text-align: center; padding: 3rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading categories...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add / Edit Category Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal modal-md">
+            <div class="modal-header">
+                <h3 class="modal-title" id="category-modal-title">Add New Category</h3>
+                <button class="modal-close" onclick="Common.closeModal('category-modal')">&times;</button>
+            </div>
+            <form id="category-form" onsubmit="handleCategoryFormSubmit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="category-id">
+
+                    <div class="form-group">
+                        <label class="form-label required" for="category-name">Category Name</label>
+                        <input type="text" id="category-name" class="form-control" placeholder="e.g. Raw Materials" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="category-description">Description</label>
+                        <textarea id="category-description" class="form-control" rows="3" placeholder="Brief definition of items grouped under this category..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="Common.closeModal('category-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Products Modal -->
+    <div class="modal-overlay" id="category-products-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title" id="category-products-modal-title">Products in Category</h3>
+                <button class="modal-close" onclick="Common.closeModal('category-products-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container" style="box-shadow: none;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>SKU</th>
+                                <th>Pricing</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="category-products-tbody">
+                            <tr><td colspan="4" class="table-empty">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="Common.closeModal('category-products-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/categories.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (Auth.requireAuth()) {
+                Common.initLayout('categories', 'Category Management', 'Supply Chain');
+                loadCategories();
+            }
+        });
+    </script>
+</body>
+</html>

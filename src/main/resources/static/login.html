@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In – SupplySync Enterprise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--slate-100);
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--slate-200);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background-color: var(--navy-900);
+            color: #ffffff;
+            padding: 2.25rem 2rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-brand-icon {
+            width: 48px;
+            height: 48px;
+            background: #2563eb;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .login-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        .login-subtitle {
+            font-size: var(--font-size-xs);
+            color: var(--slate-400);
+            margin-top: 0.35rem;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .demo-badges-container {
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px dashed var(--slate-200);
+        }
+
+        .demo-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--slate-400);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .demo-buttons-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .demo-btn {
+            background-color: var(--slate-50);
+            border: 1px solid var(--slate-300);
+            padding: 0.5rem 0.65rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            color: var(--slate-700);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .demo-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-border);
+            color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-brand-icon">
+                <i class="fa-solid fa-cubes-stacked"></i>
+            </div>
+            <h1 class="login-title">SupplySync</h1>
+            <p class="login-subtitle">Enterprise Supply Chain & Vendor Management</p>
+        </div>
+
+        <div class="login-body">
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label required" for="email">Work Email</label>
+                    <div style="position: relative;">
+                        <input type="email" id="email" class="form-control" placeholder="name@company.com" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="password">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: var(--font-size-xs);">
+                    <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--slate-600);">
+                        <input type="checkbox" id="remember-me" checked>
+                        <span>Remember session</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="alert('Please contact your administrator at admin@supplysync.com to reset credentials.')" style="color: var(--primary);">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="btn-submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                    <span>Sign In to Platform</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="demo-badges-container">
+                <span class="demo-label">Quick Demonstration Logins:</span>
+                <div class="demo-buttons-row">
+                    <button type="button" class="demo-btn" onclick="fillCredentials('admin@supplysync.com', 'admin123')">
+                        <div style="font-weight: 700;"><i class="fa-solid fa-user-shield" style="color: #2563eb;"></i> Administrator</div>
+                        <div style="font-size: 0.68rem; color: var(--slate-500);">Full Operations</div>
+                    </button>
+                    <button type="button" class="demo-btn" onclick="fillCredentials('vendor@apexsupplies.com', 'vendor123')">
+                        <div style="font-weight: 700;"><i class="fa-solid fa-truck" style="color: #10b981;"></i> Vendor Portal</div>
+                        <div style="font-size: 0.68rem; color: var(--slate-500);">Apex Logistics</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/common.js"></script>
+    <script>
+        function fillCredentials(email, pwd) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = pwd;
+            Common.showToast(`Loaded ${email} credentials. Click "Sign In"!`, 'info');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('btn-submit');
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+
+                const userData = await Auth.login(email, password);
+                Common.showToast(`Welcome back, ${userData.fullName}!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 400);
+            } catch (err) {
+                Common.showToast(err.message || 'Invalid email or password', 'error', 'Authentication Failed');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In to Platform</span> <i class="fa-solid fa-arrow-right"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
